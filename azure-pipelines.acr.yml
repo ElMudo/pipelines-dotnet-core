@@ -5,7 +5,7 @@ pool:
 
 variables:
   buildConfiguration: 'Develop'
-  appName: 'bs-flex-api'  # Build.Repository.Name ?
+  appName: 'xxx-devops-test'  # 'bs-flex-api'  # Build.Repository.Name ?
   # define two more variables dockerId and dockerPassword in the build pipeline in UI
 
 steps:
