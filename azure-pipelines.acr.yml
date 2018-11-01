@@ -4,27 +4,23 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 variables:
-  buildConfiguration: 'Release'
-  imageName: 'dotnetcore:$(Build.BuildId)'
+  buildConfiguration: 'Develop'
+  appName: 'bs-flex-api'  # Build.Repository.Name ?
   # define two more variables dockerId and dockerPassword in the build pipeline in UI
 
 steps:
-- script: |
-    dotnet build --configuration $(buildConfiguration)
-    dotnet test dotnetcore-tests --configuration $(buildConfiguration) --logger trx
-    dotnet publish --configuration $(buildConfiguration) --output out
-    docker build -f Dockerfile -t $(dockerId).azurecr.io/$(imageName) .
-    docker login -u $(dockerId) -p $pswd $(dockerid).azurecr.io
-    docker push $(dockerId).azurecr.io/$(imageName)
-  env:
-    pswd: $(dockerPassword)
-
-- task: PublishTestResults@2
+- task: Docker@1
+  displayName: 'Build image (self-service)'
   inputs:
-    testRunner: VSTest
-    testResultsFiles: '**/*.trx'
-
-#- script: |
-#    docker-compose -f docs/docker-compose.yml --project-directory . -p docs up -d |
-#    docker wait docs_sut_1 |
-#    docker-compose -f docs/docker-compose.yml --project-directory . down
+    imageName: '$(appName):$(Build.SourceBranchName)'
+- task: Docker@1
+  displayName: Login
+  inputs:
+    azureSubscriptionEndpoint: 'Lias Online Dev'
+    azureContainerRegistry: liasomniadevakscicdmvpacr.azurecr.io
+    command: login
+- task: Docker@1
+  displayName: 'Push image (self-service)'
+  inputs:
+    command: 'push'
+    imageName: '$(appName):$(Build.SourceBranchName)'
